@@ -1,5 +1,6 @@
 .data
 count:            .word 1
+delay_amt:        .word 1000
 
 red:              .byte 0,0,255
 .align             4
@@ -33,7 +34,11 @@ main:
     
     lw s3, count # s3 = count
     la s4, sequence # s4 = sequence[] 
-start_next_round:
+    lw s10, delay_amt
+    li s7, 0
+    li s8, 1
+    li s9, 2
+start_round:
 # This loop initializes the array with random numbers
 array_init_loop_init:
     li s2, 0 # s2 = 0
@@ -65,38 +70,35 @@ read_array_and_display_body:
     slli s5, s2, 2 # s5 = s2 * 4
     add s5, s5, s4 # s5 is address of sequence[s2]
     lw s6, 0(s5) # s6 = sequence[s2] (which is a random num)
-    li s7, 0
-    li s8, 1
-    li s9, 2
     
 check_up:
     bne s6, s7, check_down
     call turn_on_up
-    li a0, 1000
+    mv a0, s10
     call delay
     call turn_off_up
     j end_check
 check_down:
     bne s6, s8, check_left
     call turn_on_down
-    li a0, 1000
+    mv a0, s10
     call delay
     call turn_off_down
     j end_check
 check_left:
     bne s6, s9, check_right
     call turn_on_left
-    li a0, 1000
+    mv a0, s10
     call delay
     call turn_off_left
     j end_check
 check_right:
     call turn_on_right
-    li a0, 1000
+    mv a0, s10
     call delay
     call turn_off_right
 end_check:
-    li a0, 1000
+    li a0, 1000 # 1 second break between each round
     call delay
     addi s2, s2, 1 # s2 = s2 + 1
     j read_array_and_display_body
@@ -118,7 +120,38 @@ read_array_and_poll_body:
     lw s6, 0(s5) # s6 = sequence[s2] (which is a random num)
     call pollDpad # Getting the input from dpad
     
+    addi sp, sp, -4
+    sw a0, 0(sp)
+check_up_user:
+    bne a0, s7, check_down_user
+    call turn_on_up
+    li a0, 100
+    call delay
+    call turn_off_up
+    j input_check
+check_down_user:
+    bne a0, s8, check_left_user
+    call turn_on_down
+    li a0, 100
+    call delay
+    call turn_off_down
+    j input_check
+check_left_user:
+    bne a0, s9, check_right_user
+    call turn_on_left
+    li a0, 100
+    call delay
+    call turn_off_left
+    j input_check
+check_right_user:
+    call turn_on_right
+    li a0, 100
+    call delay
+    call turn_off_right
+
 input_check:
+    lw a0, 0(sp)
+    addi sp, sp, 4
     bne a0, s6, game_over
 
     addi s2, s2, 1 # s2 = s2 + 1
@@ -127,15 +160,27 @@ read_array_and_poll_end:
     call turn_on_correct
     li a0, 50
     call delay
-    call turn_off_correct
+    call turn_off_middle
     li a0, 50
     call delay
     call turn_on_correct
     li a0, 50
     call delay
-    call turn_off_correct
+    call turn_off_middle
+end_round:
+    addi s3, s3, 1
+    j start_round
 game_over:
-    
+    call turn_on_wrong
+    li a0, 50
+    call delay
+    call turn_off_middle
+    li a0, 50
+    call delay
+    call turn_on_wrong
+    li a0, 50
+    call delay
+    call turn_off_middle
     # TODO: Ask if the user wishes to play again and either loop back to
     # start a new round or terminate, based on their input.
  
@@ -313,8 +358,19 @@ turn_on_correct:
     lw ra, 0(sp)
     addi, sp, sp, 4
     jr ra
+
+turn_on_wrong:
+    addi sp, sp, -4
+    sw ra, 0(sp)
+    lw a0, red
+    li a1, 1
+    li a2, 1
+    call setLED
+    lw ra, 0(sp)
+    addi, sp, sp, 4
+    jr ra
     
-turn_off_correct:
+turn_off_middle:
     addi sp, sp, -4
     sw ra, 0(sp)
     lw a0, black
@@ -324,3 +380,6 @@ turn_off_correct:
     lw ra, 0(sp)
     addi, sp, sp, 4
     jr ra
+    
+
+    
