@@ -19,6 +19,32 @@ pink:             .byte 203,82,217
 purple:           .byte 237,102,127
 .align             4
 
+promptWelcome:    .string "Welcome to Simon game. The game will start in 5 seconds.\n"
+.align             4
+promptInstruction1: .string "When it's your turn, press the dpad in accordance with the sequence that will appear on the LED matrix.\n"
+.align             4
+promptInstruction2: .string "Blue is up, yellow is downn, pink is left, purple is right.\n"
+.align             4
+promptInstruction3: .string "The middle will light up as green if you enter the sequence correctly.\n"
+.align             4
+
+inGameMessage1:     .string "Round "
+.align             4
+inGameMessage2:     .string " starting.\n"
+.align             4
+inGameMessage3:    .string "Generating sequence...\n"
+.align             4
+inGameMessage4:    .string "Your turn.\n"
+.align             4
+inGameMessage5:    .string "Well done.\n"
+.align             4
+inGameMessage6:    .string "Game over.\n"
+.align             4
+inGameMessage7:    .string "Do you want to play again? Press up on the dpad to restart the game, press other buttons to end the game.\n"
+.align             4
+inGameMessage8:    .string "Thanks for playing.\n"
+.align             4
+
 sequence:         .byte 0,0,0,0
 
 .globl main
@@ -38,10 +64,41 @@ main:
     li s7, 0
     li s8, 1
     li s9, 2
-
+    
+    li a7, 4 
+    la a0, promptWelcome # Welcome message
+    ecall
+    
+    li a7, 4 
+    la a0, promptInstruction1 # Instruction 1
+    ecall
+    
+    li a7, 4 
+    la a0, promptInstruction2 # Instruction 2
+    ecall
+    
+    li a7, 4 
+    la a0, promptInstruction3 # Instruction 3
+    ecall
+    
     li a0, 5000
     call delay
 start_round:
+    li a7, 4 
+    la a0, inGameMessage1
+    ecall
+    
+    li a7, 1 
+    mv a0, s3
+    ecall
+    
+    li a7, 4 
+    la a0, inGameMessage2
+    ecall
+    
+    li a7, 4 
+    la a0, inGameMessage3
+    ecall
 # This loop initializes the array with random numbers
 array_init_loop_init:
     li s2, 0 # s2 = 0
@@ -116,11 +173,17 @@ read_array_and_display_end:
 
 read_array_and_poll_init:
     li s2, 0 # s2 = 0  
+    
+    li a7, 4 
+    la a0, inGameMessage4
+    ecall
+    
 read_array_and_poll_body:
     bge s2, s3, read_array_and_poll_end # check if s2 >= s3, if yes, end
     slli s5, s2, 2 # s5 = s2 * 4
     add s5, s5, s4 # s5 is address of sequence[s2]
     lw s6, 0(s5) # s6 = sequence[s2] (which is a random num)
+    
     call pollDpad # Getting the input from dpad
     
     addi sp, sp, -4
@@ -176,10 +239,18 @@ end_round:
     beq s10, t0, dont_subtract_delay
     addi s10, s10, -100
 dont_subtract_delay:
+    li a7, 4 
+    la a0, inGameMessage5
+    ecall
+    
     li a0, 1500
     call delay
     j start_round
 game_over:
+    li a7, 4 
+    la a0, inGameMessage6
+    ecall
+    
     call turn_on_wrong
     li a0, 50
     call delay
@@ -192,8 +263,18 @@ game_over:
     call turn_off_middle
     # TODO: Ask if the user wishes to play again and either loop back to
     # start a new round or terminate, based on their input.
- 
+    li a7, 4 
+    la a0, inGameMessage7
+    ecall
+
+    call pollDpad
+    beq a0, zero, main
+    
 exit:
+    li a7, 4 
+    la a0, inGameMessage8
+    ecall
+    
     li a7, 10
     ecall
     
