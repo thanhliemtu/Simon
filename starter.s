@@ -38,6 +38,9 @@ main:
     li s7, 0
     li s8, 1
     li s9, 2
+
+    li a0, 5000
+    call delay
 start_round:
 # This loop initializes the array with random numbers
 array_init_loop_init:
@@ -169,6 +172,12 @@ read_array_and_poll_end:
     call turn_off_middle
 end_round:
     addi s3, s3, 1
+    li t0, 100
+    beq s10, t0, dont_subtract_delay
+    addi s10, s10, -100
+dont_subtract_delay:
+    li a0, 1500
+    call delay
     j start_round
 game_over:
     call turn_on_wrong
@@ -187,7 +196,6 @@ game_over:
 exit:
     li a7, 10
     ecall
-    
     
 # --- HELPER FUNCTIONS ---
 # Feel free to use (or modify) them however you see fit
