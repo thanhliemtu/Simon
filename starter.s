@@ -105,10 +105,10 @@ array_init_loop_init:
 
 array_init_loop_body:
     bge s2, s3, array_init_loop_end # check if s2 >= s3, if yes, end
-    slli s5, s2, 0 # s5 = s2 * 4
+    slli s5, s2, 0 # s5 = s2 * 1
     add s5, s5, s4 # s5 is address of sequence[s2]
     li a0, 4 # Putting 4 into a0
-    call rand # Calling rand with a0 = 10, so rand(10)
+    call rand # Calling rand with a0 = 4, so rand(4)
     sb a0, 0(s5) # sequence[s2] = a0 (which is a random num)
     addi s2, s2, 1 # s2 = s2 + 1
     j array_init_loop_body
@@ -127,7 +127,7 @@ read_array_and_display_init:
     li s2, 0 # s2 = 0
 read_array_and_display_body:
     bge s2, s3, read_array_and_display_end # check if s2 >= s3, if yes, end
-    slli s5, s2, 0 # s5 = s2 * 4
+    slli s5, s2, 0 # s5 = s2 * 1
     add s5, s5, s4 # s5 is address of sequence[s2]
     lb s6, 0(s5) # s6 = sequence[s2] (which is a random num)
     
@@ -180,7 +180,7 @@ read_array_and_poll_init:
     
 read_array_and_poll_body:
     bge s2, s3, read_array_and_poll_end # check if s2 >= s3, if yes, end
-    slli s5, s2, 0 # s5 = s2 * 4
+    slli s5, s2, 0 # s5 = s2 * 1
     add s5, s5, s4 # s5 is address of sequence[s2]
     lb s6, 0(s5) # s6 = sequence[s2] (which is a random num)
     
