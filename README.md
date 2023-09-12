@@ -1,2 +1,1 @@
-# csc258project
-CSC258 Assembly Project
+Simon Game Assembly Project
